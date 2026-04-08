@@ -99,3 +99,10 @@ async function deletePoll(pollId) {
     loadResults(); // refresh results list
   }
 }
+
+// Fetch results periodically for real-time updates
+setInterval(() => {
+  if (ADMIN_PASSWORD) {
+    loadResults();
+  }
+}, 5000);

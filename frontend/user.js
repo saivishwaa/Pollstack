@@ -44,4 +44,7 @@ async function vote(pollId, optionIndex) {
   }
 }
 
-window.onload = loadPolls;
+window.onload = () => {
+  loadPolls();
+  setInterval(loadPolls, 5000); // Fetch data every 5 seconds for real-time updates
+};
