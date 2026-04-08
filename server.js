@@ -39,8 +39,24 @@ app.post('/api/poll', async (req, res) => {
 
 app.get('/api/polls', async (req, res) => {
   try {
+    const userIp = req.ip;
     const polls = await Poll.find().sort({ _id: -1 });
-    res.json(polls);
+
+    const formattedPolls = polls.map(poll => {
+      const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+      return {
+        _id: poll._id,
+        question: poll.question,
+        hasVoted: poll.votedUsers.includes(userIp),
+        options: poll.options.map(opt => ({
+          text: opt.text,
+          votes: opt.votes,
+          percentage: totalVotes === 0 ? "0%" : ((opt.votes / totalVotes) * 100).toFixed(0) + "%"
+        }))
+      };
+    });
+
+    res.json(formattedPolls);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

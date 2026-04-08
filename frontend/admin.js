@@ -71,9 +71,14 @@ async function loadResults() {
     <div style="margin-bottom: 20px; border-bottom: 1px solid #ddd; padding-bottom: 10px;">
       <h3>${poll.question}</h3>
       ${poll.options.map(opt => `
-        <p>${opt.text} - ${opt.votes} votes (${opt.percentage})</p>
+        <div style="margin-bottom: 10px;">
+          <p style="margin: 0 0 5px 0;">${opt.text} - ${opt.votes} votes (${opt.percentage})</p>
+          <div style="width: 100%; background-color: #f3f3f3; border-radius: 5px; overflow: hidden; height: 10px;">
+            <div style="width: ${opt.percentage}; height: 100%; background-color: #2196F3;"></div>
+          </div>
+        </div>
       `).join("")}
-      <button style="background: red; color: white;" onclick="deletePoll('${poll._id}')">Delete Poll</button>
+      <button style="background: red; color: white; margin-top: 10px;" onclick="deletePoll('${poll._id}')">Delete Poll</button>
     </div>
   `).join("");
 }
