@@ -1,4 +1,4 @@
-const BASE_URL = "https://pollstack-backend.onrender.com";
+const BASE_URL = "https://pollstack-backend.onrender.com/api";
 
 let ADMIN_PASSWORD = "";
 let currentPollId = null;
