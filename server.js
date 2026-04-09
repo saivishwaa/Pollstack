@@ -7,7 +7,9 @@ const Poll = require('./models/Poll');
 const app = express();
 
 // ✅ Middleware
-app.use(cors());
+app.use(cors({
+origin: "*"
+}));
 app.use(express.json());
 
 // ✅ MongoDB Connection
@@ -208,4 +210,4 @@ app.delete('/api/poll/:id', async (req, res) => {
 // ✅ Start Server
 app.listen(3000, () => {
   console.log("🚀 Server running on port 3000");
-});
+});
