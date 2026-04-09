@@ -37,6 +37,31 @@ app.post('/api/poll', async (req, res) => {
   res.json(poll);
 });
 
+app.get('/api/polls', async (req, res) => {
+  try {
+    const userIp = req.ip;
+    const polls = await Poll.find().sort({ _id: -1 });
+
+    const formattedPolls = polls.map(poll => {
+      const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+      return {
+        _id: poll._id,
+        question: poll.question,
+        hasVoted: poll.votedUsers.includes(userIp),
+        options: poll.options.map(opt => ({
+          text: opt.text,
+          votes: opt.votes,
+          percentage: totalVotes === 0 ? "0%" : ((opt.votes / totalVotes) * 100).toFixed(0) + "%"
+        }))
+      };
+    });
+
+    res.json(formattedPolls);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/api/results/latest', async (req, res) => {
   try {
     const poll = await Poll.findOne().sort({ _id: -1 });
@@ -102,6 +127,32 @@ app.post('/api/vote', async (req, res) => {
   }
 });
 
+// ✅ Get All Results API
+app.get('/api/results/all', async (req, res) => {
+  try {
+    const polls = await Poll.find().sort({ _id: -1 });
+
+    const results = polls.map(poll => {
+      const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+      const options = poll.options.map(opt => ({
+        text: opt.text,
+        votes: opt.votes,
+        percentage: totalVotes === 0 ? "0%" : ((opt.votes / totalVotes) * 100).toFixed(0) + "%"
+      }));
+
+      return {
+        _id: poll._id,
+        question: poll.question,
+        options
+      };
+    });
+
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ✅ Get Results API
 app.get('/api/results/:id', async (req, res) => {
   try {
@@ -133,35 +184,28 @@ app.get('/api/results/:id', async (req, res) => {
   }
 });
 
-// ✅ Start Server
-app.listen(3000, () => {
-  console.log("🚀 Server running on port 3000");
-});
-app.get('/api/results/latest', async (req, res) => {
-  try {
-    const poll = await Poll.findOne().sort({ _id: -1 });
 
-    if (!poll) {
-      return res.status(404).json({ error: "No polls found" });
+// ✅ Delete Poll API
+app.delete('/api/poll/:id', async (req, res) => {
+  try {
+    const { adminPassword } = req.body;
+
+    if (adminPassword !== ADMIN_PASSWORD) {
+      return res.status(403).json({ error: "Unauthorized" });
     }
 
-    const totalVotes = poll.options.reduce((sum, opt) => sum + opt.votes, 0);
+    const poll = await Poll.findByIdAndDelete(req.params.id);
+    if (!poll) {
+      return res.status(404).json({ error: "Poll not found" });
+    }
 
-    const options = poll.options.map(opt => ({
-      text: opt.text,
-      votes: opt.votes,
-      percentage: totalVotes === 0
-        ? "0%"
-        : ((opt.votes / totalVotes) * 100).toFixed(0) + "%"
-    }));
-
-    res.json({
-      _id: poll._id,
-      question: poll.question,
-      options: options
-    });
-
+    res.json({ message: "✅ Poll deleted!" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+// ✅ Start Server
+app.listen(3000, () => {
+  console.log("🚀 Server running on port 3000");
+});
