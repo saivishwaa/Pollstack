@@ -1,4 +1,4 @@
-const BASE_URL = "https://pollstack-backend.onrender.com";
+const BASE_URL = "https://pollstack-backend.onrender.com/api";
 const localVotedPolls = JSON.parse(localStorage.getItem('votedPolls') || '[]');
 
 // Load all polls
